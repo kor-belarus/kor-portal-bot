@@ -1,0 +1,7 @@
+logging.level.org.kor.portal: DEBUG
+
+bot:
+  enabled: false
+  username: korportalbot
+  token: token-value
+  adminChatId: 1000
