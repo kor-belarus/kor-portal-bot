@@ -1,7 +1,14 @@
 spring.application.name: kor-portal
 
+logging.level.root: INFO
+logging.level.org.kor.portal: INFO
+
 bot:
   enabled: true
   username: korportalbot
   token: ${bot.token}
   adminChatId: ${bot.adminChatId}
+
+robofinist:
+  url.v2: https://robofinist.ru/api/v2
+  token: ${robofinist.token}

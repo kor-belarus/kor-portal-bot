@@ -1,0 +1,203 @@
+{
+  "errors": [],
+  "code": 200,
+  "data": [
+    {
+      "display_id": "EVE-1303",
+      "id": 1303,
+      "event_type_id": 3,
+      "name": "Конкурс \"Дорога в будущее\". Этап Минской области Кубка по образовательной робототехнике. Сезон 24\/25г",
+      "registrationBeginAt": "2025-02-05 23:59:00",
+      "registrationEndAt": "2025-03-10 23:59:00",
+      "beginAt": "2025-03-15 08:00:00",
+      "endAt": "2025-03-15 18:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-44303",
+        "id": 44303,
+        "name": "Частное унитарное предприятие «Соревнования по робототехнике»",
+        "inn": "193793437",
+        "country_id": 21
+      }
+    },
+    {
+      "display_id": "EVE-1283",
+      "id": 1283,
+      "event_type_id": 3,
+      "name": "Кубок по образовательной робототехнике. Минская открытая лига робототехники. 3 этап сезона 24\/25г",
+      "registrationBeginAt": "2025-01-22 00:00:00",
+      "registrationEndAt": "2025-02-03 23:59:00",
+      "beginAt": "2025-02-08 08:00:00",
+      "endAt": "2025-02-09 18:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-44303",
+        "id": 44303,
+        "name": "Частное унитарное предприятие «Соревнования по робототехнике»",
+        "inn": "193793437",
+        "country_id": 21
+      }
+    },
+    {
+      "display_id": "EVE-1255",
+      "id": 1255,
+      "event_type_id": 3,
+      "name": "Кубок по образовательной робототехнике. Минская открытая лига робототехники. 2 этап сезона 24\/25г",
+      "registrationBeginAt": "2024-12-19 00:00:00",
+      "registrationEndAt": "2025-01-11 23:59:00",
+      "beginAt": "2025-01-12 08:00:00",
+      "endAt": "2025-01-17 19:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-44303",
+        "id": 44303,
+        "name": "Частное унитарное предприятие «Соревнования по робототехнике»",
+        "inn": "193793437",
+        "country_id": 21
+      }
+    },
+    {
+      "display_id": "EVE-1246",
+      "id": 1246,
+      "event_type_id": 3,
+      "name": "Кубок по образовательной робототехнике. Минская открытая лига робототехники. 1 этап сезона 24\/25г",
+      "registrationBeginAt": "2024-12-05 00:00:00",
+      "registrationEndAt": "2024-12-10 01:00:00",
+      "beginAt": "2024-12-13 14:00:00",
+      "endAt": "2024-12-13 20:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-44303",
+        "id": 44303,
+        "name": "Частное унитарное предприятие «Соревнования по робототехнике»",
+        "inn": "193793437",
+        "country_id": 21
+      }
+    },
+    {
+      "display_id": "EVE-1210",
+      "id": 1210,
+      "event_type_id": 3,
+      "name": "VI Брестский турнир по робототехнике \"SmartRoboFest\". Этап Брестской области Кубка по образовательной робототехнике. Сезон 24\/25г",
+      "registrationBeginAt": "2024-10-18 00:00:00",
+      "registrationEndAt": "2024-10-28 23:59:00",
+      "beginAt": "2024-11-02 08:00:00",
+      "endAt": "2024-11-02 18:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-44303",
+        "id": 44303,
+        "name": "Частное унитарное предприятие «Соревнования по робототехнике»",
+        "inn": "193793437",
+        "country_id": 21
+      }
+    },
+    {
+      "display_id": "EVE-1000",
+      "id": 1000,
+      "event_type_id": 1,
+      "name": "РобоФинист 2024",
+      "registrationBeginAt": "2024-05-01 00:00:00",
+      "registrationEndAt": "2024-07-25 23:59:00",
+      "beginAt": "2024-10-07 09:00:00",
+      "endAt": "2024-10-10 19:00:00",
+      "active": 1,
+      "name_en": "RoboFinist 2024",
+      "mainOrganization": {
+        "display_id": "ORG-1",
+        "id": 1,
+        "name": "Благотворительный фонд \"ФИНИСТ\"",
+        "inn": "7840290795",
+        "country_id": 171
+      }
+    },
+    {
+      "display_id": "EVE-1030",
+      "id": 1030,
+      "event_type_id": 3,
+      "name": "XI Минский открытый роботурнир. Отборочный этап РобоФинист 2024 Минск.",
+      "registrationBeginAt": "2024-04-04 00:00:00",
+      "registrationEndAt": "2024-05-27 00:00:00",
+      "beginAt": "2024-06-08 10:00:00",
+      "endAt": "2024-06-10 17:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-43388",
+        "id": 43388,
+        "name": "Научно-инновационное учреждение «Умный Брест»",
+        "inn": "291547396",
+        "country_id": 21
+      }
+    },
+    {
+      "display_id": "EVE-1148",
+      "id": 1148,
+      "event_type_id": 3,
+      "name": "Кубок по образовательной робототехнике. Итог сезона 23\/24г",
+      "registrationBeginAt": "2024-05-25 00:00:00",
+      "registrationEndAt": "2024-06-03 00:00:00",
+      "beginAt": "2024-06-05 00:00:00",
+      "endAt": "2024-06-07 00:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-43388",
+        "id": 43388,
+        "name": "Научно-инновационное учреждение «Умный Брест»",
+        "inn": "291547396",
+        "country_id": 21
+      }
+    },
+    {
+      "display_id": "EVE-1034",
+      "id": 1034,
+      "event_type_id": 3,
+      "name": "Этап Минской области Кубка по образовательной робототехнике. Сезон 23\/24г",
+      "registrationBeginAt": "2024-05-02 00:00:00",
+      "registrationEndAt": "2024-05-20 23:59:00",
+      "beginAt": "2024-05-25 09:00:00",
+      "endAt": "2024-05-25 18:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-43388",
+        "id": 43388,
+        "name": "Научно-инновационное учреждение «Умный Брест»",
+        "inn": "291547396",
+        "country_id": 21
+      }
+    },
+    {
+      "display_id": "EVE-1028",
+      "id": 1028,
+      "event_type_id": 3,
+      "name": "Этап Гродненской области Кубка по образовательной робототехнике. Сезон 23\/24г",
+      "registrationBeginAt": "2024-04-01 00:00:00",
+      "registrationEndAt": "2024-04-26 23:00:00",
+      "beginAt": "2024-05-01 09:00:00",
+      "endAt": "2024-05-01 17:00:00",
+      "active": 1,
+      "name_en": null,
+      "mainOrganization": {
+        "display_id": "ORG-43388",
+        "id": 43388,
+        "name": "Научно-инновационное учреждение «Умный Брест»",
+        "inn": "291547396",
+        "country_id": 21
+      }
+    }
+  ],
+  "pagination": {
+    "TotalCount": 35,
+    "PageCount": 4,
+    "CurrentPage": 1,
+    "PageSize": 10,
+    "PageVar": "page"
+  }
+}
