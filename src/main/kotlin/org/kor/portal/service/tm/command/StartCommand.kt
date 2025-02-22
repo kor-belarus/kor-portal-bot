@@ -12,7 +12,7 @@ class StartCommand : Command {
         createTmMessage(request,
             "КОР Портал бот\n\n" +
                 "Бот для управления мероприятием КОР на поротале robofinist\n\n" +
-                "/events - список соревнований\n",
+                "/events - список мероприятий\n",
             inlineKeyboardMarkup = createButtons(buttons))
 
     companion object {

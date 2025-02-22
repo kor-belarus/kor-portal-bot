@@ -23,7 +23,7 @@ class EventsCommand(
 
         val events = robofinistService.getEvents()
         val map = events.data.associateBy({ it.id.toString() }, { "#${it.id} ${shortEventName(it.name)}" })
-        return createTmMessage(request, "Выберите соревнование:", createButtons(map))
+        return createTmMessage(request, "Выберите мероприятие:", createButtons(map))
     }
 
     private fun shortEventName(name: String): String = name

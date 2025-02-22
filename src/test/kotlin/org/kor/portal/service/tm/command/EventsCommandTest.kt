@@ -28,7 +28,7 @@ class EventsCommandTest(
         val result = eventsCommand.answer(CommandRequest(listOf(), "123")) as SendMessage
 
         assertThat(result.chatId).isEqualTo("123")
-        assertThat(result.text).contains("Выберите соревнование:")
+        assertThat(result.text).contains("Выберите мероприятие:")
         val replyMarkup = result.replyMarkup as InlineKeyboardMarkup
         assertThat(replyMarkup.keyboard.size).isEqualTo(11)
         val inlineKeyboardButton = replyMarkup.keyboard[0][0]
@@ -45,7 +45,7 @@ class EventsCommandTest(
 
         assertThat(result.chatId).isEqualTo("123")
         assertThat(result.messageId).isEqualTo(567)
-        assertThat(result.text).contains("Выберите соревнование:")
+        assertThat(result.text).contains("Выберите мероприятие:")
     }
 
 
