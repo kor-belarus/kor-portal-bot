@@ -22,11 +22,17 @@ class EventsCommand(
         }
 
         val events = robofinistService.getEvents()
-        val map = events.data.associateBy({ it.id.toString() }, { "#${it.id} ${it.name}" })
+        val map = events.data.associateBy({ it.id.toString() }, { "#${it.id} ${shortEventName(it.name)}" })
         return createTmMessage(request, "Выберите соревнование:", createButtons(map))
     }
 
+    private fun shortEventName(name: String): String = name
+        .replace(korRegex, "КОР")
+        .replace(molrRegex, "МОЛР")
+
     companion object : KLogging() {
         private const val EVENTS = "events"
+        private val korRegex = "Куб.+ по образовательной робототехнике".toRegex()
+        private val molrRegex = "Минская открытая лига робототехники".toRegex()
     }
 }

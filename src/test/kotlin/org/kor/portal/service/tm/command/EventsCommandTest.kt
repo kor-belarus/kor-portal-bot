@@ -48,6 +48,20 @@ class EventsCommandTest(
         assertThat(result.text).contains("Выберите соревнование:")
     }
 
+
+    @Test
+    fun answerListCheckShortNames() {
+        spyRestTemplate.stubResponseFileContent("event/event-search-response.json")
+
+        val result = eventsCommand.answer(CommandRequest(listOf(), "123")) as SendMessage
+
+        val replyMarkup = result.replyMarkup as InlineKeyboardMarkup
+        val buttons = replyMarkup.keyboard.flatten()
+        assertThat(buttons.count { it.text.contains("КОР") }).isEqualTo(8)
+        assertThat(buttons.count { it.text.contains("МОЛР") }).isEqualTo(3)
+
+    }
+
     @Test
     fun answerEventDetailsEdit() {
         val result = eventsCommand.answer(CommandRequest(listOf("1303"), "123", 567)) as EditMessageText
