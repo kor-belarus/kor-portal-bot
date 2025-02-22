@@ -12,3 +12,4 @@ bot:
 robofinist:
   url.v2: https://robofinist.ru/api/v2
   token: ${robofinist.token}
+  partnerId: 44303
