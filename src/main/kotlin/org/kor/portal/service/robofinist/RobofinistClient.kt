@@ -15,8 +15,8 @@ class RobofinistClient(
     @param:Value("\${robofinist.url.v2}") val url: String,
 ) {
 
-    fun getEvents(partnerId: Int): EventsSearchResponse =
-        execute<EventsSearchResponse>(EventsSearchRequest(partnerId = partnerId))
+    fun getEvents(id: Int? = null, partnerId: Int? = null): EventsSearchResponse =
+        execute<EventsSearchResponse>(EventsSearchRequest(id = id, partnerId = partnerId))
 
     private inline fun <reified T> execute(request: BaseRequest): T {
         try {

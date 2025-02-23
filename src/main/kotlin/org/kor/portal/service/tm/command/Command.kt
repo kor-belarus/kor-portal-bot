@@ -24,11 +24,12 @@ interface Command {
         text: String,
         inlineKeyboardMarkup: InlineKeyboardMarkup? = null,
         replyKeyboard: ReplyKeyboard? = null,
+        html: Boolean = false,
     ): BotApiMethod<out Serializable> =
         if (request.messageId == null) {
-            SendMessage().create(request.chatId, text, replyKeyboard ?: inlineKeyboardMarkup)
+            SendMessage().create(request.chatId, text, replyKeyboard ?: inlineKeyboardMarkup, html = html)
         } else {
-            EditMessageText().create(request.chatId, request.messageId, text, inlineKeyboardMarkup)
+            EditMessageText().create(request.chatId, request.messageId, text, inlineKeyboardMarkup, html = html)
         }
 
     fun createButtons(
@@ -61,7 +62,7 @@ interface Command {
 
     fun createButton(operation: String, text: String, path: List<String>): InlineKeyboardButton {
         val fullPath = mutableListOf<String>()
-        if (command != "start") fullPath.add(command)
+        if (command != "start" && command != "") fullPath.add(command)
         fullPath.addAll(path)
         if ("back" == operation) {
             fullPath.removeLastOrNull()

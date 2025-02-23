@@ -14,16 +14,24 @@ class EventsCommand(
     override val command: String
         get() = EVENTS
 
-    override fun answer(request: CommandRequest): BotApiMethod<out Serializable> {
-
+    override fun answer(request: CommandRequest): BotApiMethod<out Serializable> =
         if (request.hasNext()) {
-            val eventId = request.next()
-            return createTmMessage(request, "Выбрано $eventId", createButtons(listOf(), listOf(eventId)))
+            processEvent(request)
+        } else {
+            val events = robofinistService.getEvents()
+            val map = events.data.associateBy({ it.id.toString() }, { "#${it.id} ${shortEventName(it.name)}" })
+            createTmMessage(request, "Выберите мероприятие:", createButtons(map))
         }
 
-        val events = robofinistService.getEvents()
-        val map = events.data.associateBy({ it.id.toString() }, { "#${it.id} ${shortEventName(it.name)}" })
-        return createTmMessage(request, "Выберите мероприятие:", createButtons(map))
+    private fun processEvent(request: CommandRequest): BotApiMethod<out Serializable> {
+        val eventId = request.next()
+        val event = robofinistService.getEvents(eventId.toInt())
+            ?: return createTmMessage(request, "Мероприятие #$eventId не найдено", createButtons())
+
+        val text = "<b>ID</b>: $eventId\n\n" +
+            "<b>Name</b>: ${event.name}\n\n" +
+            "<b>Location</b>: ${event.location ?: ""}"
+        return createTmMessage(request, text, createButtons(listOf(), listOf(eventId)), html = true)
     }
 
     private fun shortEventName(name: String): String = name
