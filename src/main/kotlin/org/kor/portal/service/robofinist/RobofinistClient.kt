@@ -4,6 +4,8 @@ import mu.KLogging
 import org.kor.portal.service.robofinist.model.BaseRequest
 import org.kor.portal.service.robofinist.model.event.EventsSearchRequest
 import org.kor.portal.service.robofinist.model.event.EventsSearchResponse
+import org.kor.portal.service.robofinist.model.program.ProgramSearchRequest
+import org.kor.portal.service.robofinist.model.program.ProgramSearchResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
@@ -17,6 +19,9 @@ class RobofinistClient(
 
     fun getEvents(id: Int? = null, partnerId: Int? = null): EventsSearchResponse =
         execute<EventsSearchResponse>(EventsSearchRequest(id = id, partnerId = partnerId))
+
+    fun getPrograms(eventId: Long): ProgramSearchResponse =
+        execute<ProgramSearchResponse>(ProgramSearchRequest(eventId = eventId))
 
     private inline fun <reified T> execute(request: BaseRequest): T {
         try {

@@ -1,0 +1,78 @@
+{
+  "errors": [],
+  "code": 200,
+  "data": [
+    {
+      "display_id": "EPR-8435",
+      "id": 8435,
+      "name": "Roborace. PRO",
+      "sort": 0
+    },
+    {
+      "display_id": "EPR-8436",
+      "id": 8436,
+      "name": "Roborace. PRO Mini",
+      "sort": 1
+    },
+    {
+      "display_id": "EPR-8437",
+      "id": 8437,
+      "name": "Roborace. Образовательные конструкторы",
+      "sort": 2
+    },
+    {
+      "display_id": "EPR-8439",
+      "id": 8439,
+      "name": "Следование по линии. PRO",
+      "sort": 4
+    },
+    {
+      "display_id": "EPR-8440",
+      "id": 8440,
+      "name": "Следование по линии. Юниоры",
+      "sort": 5
+    },
+    {
+      "display_id": "EPR-8441",
+      "id": 8441,
+      "name": "Следование по линии. Образовательные конструкторы",
+      "sort": 6
+    },
+    {
+      "display_id": "EPR-8446",
+      "id": 8446,
+      "name": "Автономные воздушные аппараты",
+      "sort": 11
+    },
+    {
+      "display_id": "EPR-8453",
+      "id": 8453,
+      "name": "Арканоид",
+      "sort": 18
+    },
+    {
+      "display_id": "EPR-8454",
+      "id": 8454,
+      "name": "Мини-сумо 10х10",
+      "sort": 19
+    },
+    {
+      "display_id": "EPR-8455",
+      "id": 8455,
+      "name": "Микро-сумо 5х5",
+      "sort": 20
+    },
+    {
+      "display_id": "EPR-8456",
+      "id": 8456,
+      "name": "Лабиринт Micromouse",
+      "sort": 21
+    },
+    {
+      "display_id": "EPR-8457",
+      "id": 8457,
+      "name": "Футбол автономных роботов RoboCupJunior Soccer Lightweight",
+      "sort": 22
+    }
+  ]
+}

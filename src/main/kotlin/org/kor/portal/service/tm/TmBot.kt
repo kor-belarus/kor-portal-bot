@@ -47,8 +47,10 @@ class TmBot(
 
     private fun sendErrorMessage(update: Update, e: Exception) {
         try {
-            val chatId = update.message.chatId.toString()
-            val message = SendMessage().create(chatId, "Произошла ошибка: ${e.message}")
+            val chatId = update.message?.chatId
+                ?: update.callbackQuery?.message?.chatId
+                ?: adminChatId
+            val message = SendMessage().create(chatId.toString(), "Произошла ошибка: ${e.message}")
             sendMessageToTelegram(message)
         } catch (e: Exception) {
             logger.error("Failed to send telegram message with error", e)

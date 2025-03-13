@@ -64,10 +64,23 @@ class EventsCommandTest(
 
     @Test
     fun answerEventDetailsEdit() {
+        spyRestTemplate.stubResponseFileContent("event/event-search-response.json")
+
         val result = eventsCommand.answer(CommandRequest(listOf("1303"), "123", 567)) as EditMessageText
 
         assertThat(result.chatId).isEqualTo("123")
         assertThat(result.messageId).isEqualTo(567)
-        assertThat(result.text).contains("Выбрано 1303")
+        assertThat(result.text).startsWith("<b>ID</b>: 1303\n\n<b>Название</b>: Конкурс")
+    }
+
+    @Test
+    fun answerEventProgramsEdit() {
+        spyRestTemplate.stubResponseFileContent("event/event-program-search-response.json")
+
+        val result = eventsCommand.answer(CommandRequest(listOf("1303", "programs"), "123", 567)) as EditMessageText
+
+        assertThat(result.chatId).isEqualTo("123")
+        assertThat(result.messageId).isEqualTo(567)
+        assertThat(result.text).isEqualTo("<b>ID</b>: 1303\n\n<b>Программы</b>")
     }
 }

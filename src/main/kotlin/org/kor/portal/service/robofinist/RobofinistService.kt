@@ -3,6 +3,7 @@ package org.kor.portal.service.robofinist
 
 import org.kor.portal.service.robofinist.model.event.Event
 import org.kor.portal.service.robofinist.model.event.EventsSearchResponse
+import org.kor.portal.service.robofinist.model.program.Program
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -16,5 +17,7 @@ class RobofinistService(
     fun getEvents(): EventsSearchResponse = robofinistClient.getEvents(partnerId = partnerId)
 
     fun getEvents(id: Int): Event? = robofinistClient.getEvents(id = id).data.firstOrNull()
+
+    fun getPrograms(eventId: Long): List<Program> = robofinistClient.getPrograms(eventId = eventId).data
 
 }

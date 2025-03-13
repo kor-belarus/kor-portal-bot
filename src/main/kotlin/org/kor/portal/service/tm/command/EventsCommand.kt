@@ -28,11 +28,30 @@ class EventsCommand(
         val event = robofinistService.getEvents(eventId.toInt())
             ?: return createTmMessage(request, "Мероприятие #$eventId не найдено", createButtons())
 
-        val text = "<b>ID</b>: $eventId\n\n" +
-            "<b>Name</b>: ${event.name}\n\n" +
-            "<b>Location</b>: ${event.location ?: ""}"
-        return createTmMessage(request, text, createButtons(listOf(), listOf(eventId)), html = true)
+        return if (request.hasNext()) {
+            processEventCommand(request, eventId)
+        } else {
+            val text = "<b>ID</b>: $eventId\n\n" +
+                "<b>Название</b>: ${event.name}\n\n" +
+                "<b>Место</b>: ${event.location ?: ""}\n\n" +
+                "<b>Дата</b>: ${event.beginAt ?: ""}\n\n" +
+                "<b>Регистрация до</b>: ${event.registrationEndAt ?: ""}"
+            createTmMessage(request, text, createButtons(listOf("programs"), listOf(eventId)), html = true)
+        }
     }
+
+    private fun processEventCommand(request: CommandRequest, eventId: String) =
+        when (val command = request.next()) {
+            "programs" -> {
+                val programs = robofinistService.getPrograms(eventId = eventId.toLong())
+                val text = "<b>ID</b>: $eventId\n\n" +
+                "<b>Программы</b>"
+                val buttons = programs.associate({ it.id.toString() to it.name })
+                createTmMessage(request, text, createButtons(buttons, listOf(eventId, "programs")), html = true)
+            }
+
+            else -> createTmMessage(request, "Команда `$command` не найдена", createButtons())
+        }
 
     private fun shortEventName(name: String): String = name
         .replace(korRegex, "КОР")
