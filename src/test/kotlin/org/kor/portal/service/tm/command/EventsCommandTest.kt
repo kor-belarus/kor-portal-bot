@@ -16,9 +16,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(RestTemplateTestConfig::class)
-class EventsCommandTest(
-    @Autowired val eventsCommand: EventsCommand,
-    @Autowired val spyRestTemplate: SpyRestTemplate,
+class EventsCommandTest @Autowired constructor(
+    private val eventsCommand: EventsCommand,
+    private val spyRestTemplate: SpyRestTemplate,
 ) {
 
     @Test

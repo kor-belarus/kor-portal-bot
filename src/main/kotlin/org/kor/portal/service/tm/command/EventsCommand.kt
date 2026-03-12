@@ -25,7 +25,7 @@ class EventsCommand(
 
     private fun processEvent(request: CommandRequest): BotApiMethod<out Serializable> {
         val eventId = request.next()
-        val event = robofinistService.getEvents(eventId.toInt())
+        val event = robofinistService.getEvent(eventId.toInt())
             ?: return createTmMessage(request, "Мероприятие #$eventId не найдено", createButtons())
 
         return if (request.hasNext()) {
