@@ -1,7 +1,7 @@
 package org.kor.portal.service.tm
 
 import mu.KLogging
-import org.springframework.beans.factory.annotation.Value
+import org.kor.portal.config.TmBotProperties
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
@@ -14,12 +14,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 @ConditionalOnProperty(value = ["bot.enabled"], matchIfMissing = true)
 class TmBot(
     val tmMessageProcessor: TmMessageProcessor,
-    @Value("\${bot.token}") token: String,
-    @param:Value("\${bot.username}") private val username: String,
-    @param:Value("\${bot.adminChatId}") val adminChatId: Long,
-) : TelegramLongPollingBot(token) {
+    val tmBotProperties: TmBotProperties,
+) : TelegramLongPollingBot(tmBotProperties.token) {
 
-    override fun getBotUsername() = username
+    override fun getBotUsername() = tmBotProperties.username
 
     override fun onUpdateReceived(update: Update) {
         try {
@@ -49,7 +47,7 @@ class TmBot(
         try {
             val chatId = update.message?.chatId
                 ?: update.callbackQuery?.message?.chatId
-                ?: adminChatId
+                ?: tmBotProperties.adminChatId
             val message = SendMessage().create(chatId.toString(), "Произошла ошибка: ${e.message}")
             sendMessageToTelegram(message)
         } catch (e: Exception) {
