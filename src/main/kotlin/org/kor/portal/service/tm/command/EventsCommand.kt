@@ -43,11 +43,25 @@ class EventsCommand(
     private fun processEventCommand(request: CommandRequest, eventId: String) =
         when (val command = request.next()) {
             "programs" -> {
+
                 val programs = robofinistService.getPrograms(eventId = eventId.toLong())
-                val text = "<b>ID</b>: $eventId\n\n" +
-                "<b>Программы</b>"
-                val buttons = programs.associate({ it.id.toString() to it.name })
-                createTmMessage(request, text, createButtons(buttons, listOf(eventId, "programs")), html = true)
+
+                if (request.hasNext()) {
+                    val programId = request.next().toLong()
+                    val program = programs.first { it.id == programId }
+                    val bids = robofinistService.getBids(programId = programId)
+                    val text = "<b>Мероприятие</b>: $eventId\n\n" +
+                        "<b>Программа</b>: ${program.name}\n\n" +
+                        "<b>Список участников (${bids.size}):</b>\n" +
+                        bids.joinToString("\n") { it.name }
+                    createTmMessage(request, text,
+                        createButtons(listOf("back"), listOf(eventId, "programs", programId.toString())), html = true)
+                } else {
+                    val text = "<b>ID</b>: $eventId\n\n" +
+                        "<b>Программы</b>"
+                    val buttons = programs.associate { it.id.toString() to it.name }
+                    createTmMessage(request, text, createButtons(buttons, listOf(eventId, "programs")), html = true)
+                }
             }
 
             else -> createTmMessage(request, "Команда `$command` не найдена", createButtons())
