@@ -158,10 +158,14 @@ class ExportHandler(
         val event = robofinistService.getEvent(eventId.toInt())
         val fileName = "org_stats_event_${eventId}_${System.currentTimeMillis()}.csv"
 
+        // Add UTF-8 BOM for proper encoding recognition in Excel
+        val utf8Bom = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
+        val csvBytes = utf8Bom + csvContent.toByteArray(StandardCharsets.UTF_8)
+
         val document = SendDocument().apply {
             chatId = request.chatId
             document = InputFile(
-                ByteArrayInputStream(csvContent.toByteArray(StandardCharsets.UTF_8)),
+                ByteArrayInputStream(csvBytes),
                 fileName
             )
             caption = "📊 Статистика организаций: ${event?.name ?: eventId}\n" +
