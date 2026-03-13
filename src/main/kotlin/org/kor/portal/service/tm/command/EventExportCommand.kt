@@ -3,7 +3,6 @@ package org.kor.portal.service.tm.command
 import mu.KLogging
 import org.kor.portal.config.TmBotProperties
 import org.kor.portal.service.robofinist.RobofinistService
-import org.kor.portal.service.robofinist.model.bid.Bid
 import org.kor.portal.service.robofinist.model.program.Program
 import org.kor.portal.service.tm.CommandRequest
 import org.kor.portal.service.tm.create
@@ -27,44 +26,70 @@ class ExportHandler(
     override fun answer(request: CommandRequest): BotApiMethod<out Serializable> = throw NotImplementedError()
 
     fun handleEventExport(request: CommandRequest, eventId: String): ExportResult {
-        val programs = robofinistService.getPrograms(eventId = eventId.toLong())
-        val selectedIds = programs.map { it.id }.toSet()
-
         return if (request.hasNext()) {
-            processExportCommand(request, eventId, programs, selectedIds)
+            processExportCommand(request, eventId)
         } else {
+            val programs = robofinistService.getPrograms(eventId = eventId.toLong())
+            val selectedIds = programs.map { it.id }.toSet()
             ExportResult.Message(showProgramsSelection(request, eventId, programs, selectedIds))
         }
     }
 
-    private fun processExportCommand(
-        request: CommandRequest,
-        eventId: String,
-        programs: List<Program>,
-        defaultSelectedIds: Set<Long>
-    ): ExportResult {
+    private fun processExportCommand(request: CommandRequest, eventId: String): ExportResult {
         val action = request.next()
-        
-        return when {
-            action == "generate" -> {
-                val selectedIds = parseSelectedIds(request, defaultSelectedIds)
-                generateCsvExport(request, eventId, programs, selectedIds)
+
+        return when (action) {
+            "generate" -> {
+                val selectedPrograms = parseSelectedProgramsFromButtons(request)
+                generateCsvExport(request, eventId, selectedPrograms)
             }
-            action == "toggle" && request.hasNext() -> {
-                val programId = request.next().toLong()
-                val selectedIds = parseSelectedIds(request, defaultSelectedIds)
-                val newSelectedIds = toggleSelection(selectedIds, programId)
-                ExportResult.Message(showProgramsSelection(request, eventId, programs, newSelectedIds))
+            "toggle" -> {
+                if (request.hasNext()) {
+                    val programId = request.next().toLong()
+                    val (programs, selectedIds) = parseProgramsFromButtons(request)
+                    val newSelectedIds = toggleSelection(selectedIds, programId)
+                    ExportResult.Message(showProgramsSelection(request, eventId, programs, newSelectedIds))
+                } else {
+                    val programs = robofinistService.getPrograms(eventId = eventId.toLong())
+                    ExportResult.Message(showProgramsSelection(request, eventId, programs, programs.map { it.id }.toSet()))
+                }
             }
-            else -> ExportResult.Message(showProgramsSelection(request, eventId, programs, defaultSelectedIds))
+            else -> {
+                val programs = robofinistService.getPrograms(eventId = eventId.toLong())
+                ExportResult.Message(showProgramsSelection(request, eventId, programs, programs.map { it.id }.toSet()))
+            }
         }
     }
 
-    private fun parseSelectedIds(request: CommandRequest, defaultSelectedIds: Set<Long>): Set<Long> {
-        if (!request.hasNext()) return defaultSelectedIds
-        val selectedParam = request.next()
-        if (selectedParam.isBlank() || selectedParam == "all") return defaultSelectedIds
-        return selectedParam.split(",").mapNotNull { it.toLongOrNull() }.toSet()
+    private fun parseProgramsFromButtons(request: CommandRequest): Pair<List<Program>, Set<Long>> {
+        val keyboard = request.replyMarkup ?: return Pair(emptyList(), emptySet())
+        
+        val programs = mutableListOf<Program>()
+        val selectedIds = mutableSetOf<Long>()
+        
+        for (row in keyboard.keyboard) {
+            for (button in row) {
+                val callbackData = button.callbackData ?: continue
+                if (!callbackData.contains("/toggle/")) continue
+                
+                val programId = callbackData.substringAfterLast("/toggle/").toLongOrNull() ?: continue
+                val buttonText = button.text
+                val isSelected = buttonText.startsWith(CHECKMARK_SELECTED)
+                val programName = buttonText.removePrefix(CHECKMARK_SELECTED).removePrefix(CHECKMARK_UNSELECTED).trim()
+                
+                programs.add(Program(programId, programName))
+                if (isSelected) {
+                    selectedIds.add(programId)
+                }
+            }
+        }
+        
+        return Pair(programs, selectedIds)
+    }
+
+    private fun parseSelectedProgramsFromButtons(request: CommandRequest): List<Program> {
+        val (programs, selectedIds) = parseProgramsFromButtons(request)
+        return programs.filter { selectedIds.contains(it.id) }
     }
 
     private fun toggleSelection(currentSelection: Set<Long>, programId: Long): Set<Long> =
@@ -94,44 +119,30 @@ class ExportHandler(
         selectedIds: Set<Long>
     ): InlineKeyboardMarkup {
         val basePath = "/events/$eventId/export"
-        val selectedParam = encodeSelectedIds(selectedIds, programs)
 
         val programButtons = programs.map { program ->
             val isSelected = selectedIds.contains(program.id)
-            val checkmark = if (isSelected) "✅" else "⬜"
+            val checkmark = if (isSelected) CHECKMARK_SELECTED else CHECKMARK_UNSELECTED
             val buttonText = "$checkmark ${program.name}"
-            val callbackData = "$basePath/toggle/${program.id}/$selectedParam"
+            val callbackData = "$basePath/toggle/${program.id}"
             listOf(InlineKeyboardButton().create(buttonText, callbackData))
         }
 
         val actionButtons = listOf(
-            InlineKeyboardButton().create("📥 Экспортировать CSV", "$basePath/generate/$selectedParam"),
+            InlineKeyboardButton().create("📥 Экспортировать CSV", "$basePath/generate"),
             InlineKeyboardButton().create("Назад", "/events/$eventId")
         ).map { listOf(it) }
 
         return InlineKeyboardMarkup(programButtons + actionButtons)
     }
 
-    private fun encodeSelectedIds(selectedIds: Set<Long>, allPrograms: List<Program>): String {
-        val allIds = allPrograms.map { it.id }.toSet()
-        return if (selectedIds == allIds) {
-            "all"
-        } else if (selectedIds.isEmpty()) {
-            "none"
-        } else {
-            selectedIds.joinToString(",")
-        }
-    }
-
     private fun generateCsvExport(
         request: CommandRequest,
         eventId: String,
-        programs: List<Program>,
-        selectedIds: Set<Long>
+        selectedPrograms: List<Program>
     ): ExportResult {
-        val selectedPrograms = programs.filter { selectedIds.contains(it.id) }
-        
         if (selectedPrograms.isEmpty()) {
+            val (programs, selectedIds) = parseProgramsFromButtons(request)
             return ExportResult.Message(
                 createTmMessage(
                     request,
@@ -142,7 +153,7 @@ class ExportHandler(
             )
         }
 
-        val csvContent = buildCsvContent(eventId, selectedPrograms)
+        val csvContent = buildCsvContent(selectedPrograms)
         val event = robofinistService.getEvent(eventId.toInt())
         val fileName = "export_event_${eventId}_${System.currentTimeMillis()}.csv"
 
@@ -159,7 +170,7 @@ class ExportHandler(
         return ExportResult.Document(document)
     }
 
-    private fun buildCsvContent(eventId: String, programs: List<Program>): String {
+    private fun buildCsvContent(programs: List<Program>): String {
         val sb = StringBuilder()
         sb.appendLine("Программа;ID программы;Команда;ID команды;Статус;Организации")
 
@@ -183,6 +194,8 @@ class ExportHandler(
 
     companion object : KLogging() {
         private const val EVENTS_EXPORT = "events/export"
+        private const val CHECKMARK_SELECTED = "✅ "
+        private const val CHECKMARK_UNSELECTED = "⬜ "
     }
 }
 

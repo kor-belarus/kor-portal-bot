@@ -2,12 +2,14 @@ package org.kor.portal.service.tm
 
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import java.io.Serializable
 
 data class CommandRequest(
     val path: List<String>,
     val chatId: String,
     val messageId: Int? = null,
+    val replyMarkup: InlineKeyboardMarkup? = null,
 ) : Iterator<String> {
 
     private var read = 0
