@@ -196,7 +196,7 @@ class ExportHandler(
                     emptyList()
                 }
                 
-                val place = results.firstOrNull { it.programId == program.id.toInt() }?.place
+                val place = results.firstOrNull { it.id == program.id.toInt() }?.place
                 
                 for (org in bid.organizations) {
                     val stats = orgStats.getOrPut(org.id) { 

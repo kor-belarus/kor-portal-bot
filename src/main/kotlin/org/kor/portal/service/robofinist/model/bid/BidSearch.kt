@@ -25,11 +25,15 @@ data class BidResultRequest(
 ) : BaseRequest(url = "event/bid/result/byBidList")
 
 data class BidResultResponse(
-    @param:JsonProperty("data") val data: List<BidResult>,
+    @param:JsonProperty("data") val data: BidResultData?,
 )
 
-data class BidResult(
-    @param:JsonProperty("bid_id") val bidId: Int?,
+data class BidResultData(
+    val programs: List<BidProgramResult>?,
+)
+
+data class BidProgramResult(
+    val id: Int?,
+    val name: String?,
     val place: Int?,
-    @param:JsonProperty("program_id") val programId: Int?,
 )
