@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
@@ -22,8 +23,11 @@ class TmBot(
     override fun onUpdateReceived(update: Update) {
         try {
             logger.info("Received update: {}", update)
-            tmMessageProcessor.processUpdate(update)?.let {
-                sendMessageToTelegram(it)
+            val response = tmMessageProcessor.processUpdateWithDocument(update)
+            when (response) {
+                is CommandResponse.Message -> sendMessageToTelegram(response.message)
+                is CommandResponse.Document -> sendDocumentToTelegram(response.document)
+                null -> {}
             }
         } catch (e: Exception) {
             logger.error("Failed to process telegram update", e)
@@ -42,6 +46,16 @@ class TmBot(
         }
     }
 
+    fun sendDocumentToTelegram(document: SendDocument) {
+        try {
+            logger.info("Send document to telegram: chatId={}, fileName={}", document.chatId, document.document.mediaName)
+            val answer = super.execute(document)
+            logger.debug("Response from telegram: {}", answer)
+        } catch (e: TelegramApiException) {
+            logger.error("Telegram Api Exception: {}", e.message, e)
+            throw RuntimeException("Failed to send document to telegram", e)
+        }
+    }
 
     private fun sendErrorMessage(update: Update, e: Exception) {
         try {

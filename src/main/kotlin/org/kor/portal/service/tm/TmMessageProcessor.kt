@@ -2,6 +2,7 @@ package org.kor.portal.service.tm
 
 import mu.KLogging
 import org.kor.portal.service.tm.command.Command
+import org.kor.portal.service.tm.command.EventsCommand
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod
@@ -15,21 +16,30 @@ class TmMessageProcessor(
     private val commandsMap = commands.associateBy { it.command }
 
     fun processUpdate(update: Update): BotApiMethod<*>? {
+        val response = processUpdateWithDocument(update)
+        return when (response) {
+            is CommandResponse.Message -> response.message
+            is CommandResponse.Document -> null
+            null -> null
+        }
+    }
+
+    fun processUpdateWithDocument(update: Update): CommandResponse? {
         logger.info("Process telegram update: {}", update)
         if (update.hasMessage() && update.message.hasText()) {
             val message = update.message
-            return processMessage(message.chatId, message.text, null)
+            return processMessageWithDocument(message.chatId, message.text, null)
         }
         if (update.hasCallbackQuery()) {
             val callback = update.callbackQuery
             if (callback.data?.isNotEmpty() == true) {
-                return processMessage(callback.message.chatId, callback.data, callback.message.messageId)
+                return processMessageWithDocument(callback.message.chatId, callback.data, callback.message.messageId)
             }
         }
         return null
     }
 
-    private fun processMessage(chatId: Long, sourceText: String, messageId: Int?): BotApiMethod<*>? {
+    private fun processMessageWithDocument(chatId: Long, sourceText: String, messageId: Int?): CommandResponse? {
         logger.info("Process message: text [{}], messageId {}", sourceText, messageId)
         val text = sourceText.replace("@$username", "")
 
@@ -40,7 +50,12 @@ class TmMessageProcessor(
 
         commandsMap[commandName]?.apply {
             logger.info("Found command: [{}]", commandName)
-            return this.answer(CommandRequest(path, chatId.toString(), messageId))
+            val request = CommandRequest(path, chatId.toString(), messageId)
+            return if (this is EventsCommand) {
+                this.answerWithDocument(request)
+            } else {
+                CommandResponse.Message(this.answer(request))
+            }
         }
         logger.info("Command not found: [{}]", commandName)
         return null

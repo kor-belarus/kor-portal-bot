@@ -5,6 +5,7 @@ bot:
   username: korportalbot
   token: token-value
   adminChatId: 1000
+  adminUserIds: 1000
 
 robofinist:
   url.v2: https://localhost/api/v2

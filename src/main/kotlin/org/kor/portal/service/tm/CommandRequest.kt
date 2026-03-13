@@ -1,5 +1,8 @@
 package org.kor.portal.service.tm
 
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument
+import java.io.Serializable
 
 data class CommandRequest(
     val path: List<String>,
@@ -20,4 +23,9 @@ data class CommandRequest(
 
     fun createPathRemoving(vararg removing: String) = path.filter { !removing.contains(it) }
 
+}
+
+sealed class CommandResponse {
+    data class Message(val message: BotApiMethod<out Serializable>) : CommandResponse()
+    data class Document(val document: SendDocument) : CommandResponse()
 }

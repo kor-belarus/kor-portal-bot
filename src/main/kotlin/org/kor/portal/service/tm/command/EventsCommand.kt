@@ -4,6 +4,7 @@ import mu.KLogging
 import org.kor.portal.config.TmBotProperties
 import org.kor.portal.service.robofinist.RobofinistService
 import org.kor.portal.service.tm.CommandRequest
+import org.kor.portal.service.tm.CommandResponse
 import org.springframework.stereotype.Service
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod
 import java.io.Serializable
@@ -28,13 +29,40 @@ class EventsCommand(
             createTmMessage(request, "Выберите мероприятие:", createButtons(map))
         }
 
+    fun answerWithDocument(request: CommandRequest): CommandResponse {
+        if (!request.hasNext()) {
+            return CommandResponse.Message(answer(request))
+        }
+        val eventId = request.next()
+        val event = robofinistService.getEvent(eventId.toInt())
+            ?: return CommandResponse.Message(createTmMessage(request, "Мероприятие #$eventId не найдено", createButtons()))
+
+        return if (request.hasNext()) {
+            processEventCommandWithDocument(request, eventId)
+        } else {
+            val text = "<b>ID</b>: $eventId\n\n" +
+                "<b>Название</b>: ${event.name}\n\n" +
+                "<b>Место</b>: ${event.location ?: ""}\n\n" +
+                "<b>Дата</b>: ${event.beginAt ?: ""}\n\n" +
+                "<b>Регистрация до</b>: ${event.registrationEndAt ?: ""}"
+            val buttons = mutableListOf("programs")
+            if (isAdmin(request.chatId.toLong())) buttons.add("export")
+            val keyboardMarkup = createButtons(buttons, listOf(eventId))
+            CommandResponse.Message(createTmMessage(request, text, keyboardMarkup, html = true))
+        }
+    }
+
     private fun processEvent(request: CommandRequest): BotApiMethod<out Serializable> {
         val eventId = request.next()
         val event = robofinistService.getEvent(eventId.toInt())
             ?: return createTmMessage(request, "Мероприятие #$eventId не найдено", createButtons())
 
         return if (request.hasNext()) {
-            processEventCommand(request, eventId)
+            val response = processEventCommandWithDocument(request, eventId)
+            when (response) {
+                is CommandResponse.Message -> response.message
+                is CommandResponse.Document -> throw UnsupportedOperationException("Use answerWithDocument for document responses")
+            }
         } else {
             val text = "<b>ID</b>: $eventId\n\n" +
                 "<b>Название</b>: ${event.name}\n\n" +
@@ -48,21 +76,22 @@ class EventsCommand(
         }
     }
 
-    private fun processEventCommand(request: CommandRequest, eventId: String) =
+    private fun processEventCommandWithDocument(request: CommandRequest, eventId: String): CommandResponse =
         when (val command = request.next()) {
             "programs" -> {
-                handlePrograms(eventId, request)
+                CommandResponse.Message(handlePrograms(eventId, request))
             }
             "export" -> {
                 if (isAdmin(request.chatId.toLong())) {
-                    exportHandler.handleEventExport(request, eventId)
+                    when (val result = exportHandler.handleEventExport(request, eventId)) {
+                        is ExportResult.Message -> CommandResponse.Message(result.message)
+                        is ExportResult.Document -> CommandResponse.Document(result.document)
+                    }
                 } else {
-                    createTmMessage(request, "Нет доступа к экспорту", createButtons())
+                    CommandResponse.Message(createTmMessage(request, "Нет доступа к экспорту", createButtons()))
                 }
             }
-
-
-            else -> createTmMessage(request, "Команда `$command` не найдена", createButtons())
+            else -> CommandResponse.Message(createTmMessage(request, "Команда `$command` не найдена", createButtons()))
         }
 
     private fun handlePrograms(eventId: String, request: CommandRequest): BotApiMethod<out Serializable> {
