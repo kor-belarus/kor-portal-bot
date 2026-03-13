@@ -2,8 +2,12 @@ package org.kor.portal.service.robofinist
 
 import mu.KLogging
 import org.kor.portal.service.robofinist.model.BaseRequest
+import org.kor.portal.service.robofinist.model.bid.BidResultRequest
+import org.kor.portal.service.robofinist.model.bid.BidResultResponse
 import org.kor.portal.service.robofinist.model.bid.BidSearchRequest
 import org.kor.portal.service.robofinist.model.bid.BidSearchResponse
+import org.kor.portal.service.robofinist.model.bid.ParticipantListRequest
+import org.kor.portal.service.robofinist.model.bid.ParticipantListResponse
 import org.kor.portal.service.robofinist.model.event.EventsSearchRequest
 import org.kor.portal.service.robofinist.model.event.EventsSearchResponse
 import org.kor.portal.service.robofinist.model.program.ProgramSearchRequest
@@ -27,6 +31,12 @@ class RobofinistClient(
 
     fun getBids(programId: Long): BidSearchResponse =
         execute<BidSearchResponse>(BidSearchRequest(programId = programId))
+
+    fun getParticipants(bidId: Int): ParticipantListResponse =
+        execute<ParticipantListResponse>(ParticipantListRequest(bidId = bidId))
+
+    fun getBidResults(bidId: Int): BidResultResponse =
+        execute<BidResultResponse>(BidResultRequest(bidId = bidId))
 
     private inline fun <reified T> execute(request: BaseRequest): T {
         try {

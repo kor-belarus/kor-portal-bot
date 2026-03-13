@@ -1,6 +1,8 @@
 package org.kor.portal.service.robofinist
 
 import org.kor.portal.service.robofinist.model.bid.Bid
+import org.kor.portal.service.robofinist.model.bid.BidResult
+import org.kor.portal.service.robofinist.model.bid.Participant
 import org.kor.portal.service.robofinist.model.event.Event
 import org.kor.portal.service.robofinist.model.event.EventsSearchResponse
 import org.kor.portal.service.robofinist.model.program.Program
@@ -20,5 +22,9 @@ class RobofinistService(
     fun getPrograms(eventId: Long): List<Program> = robofinistClient.getPrograms(eventId = eventId).data
 
     fun getBids(programId: Long): List<Bid> = robofinistClient.getBids(programId = programId).data
+
+    fun getParticipants(bidId: Int): List<Participant> = robofinistClient.getParticipants(bidId = bidId).data
+
+    fun getBidResults(bidId: Int): List<BidResult> = robofinistClient.getBidResults(bidId = bidId).data
 
 }

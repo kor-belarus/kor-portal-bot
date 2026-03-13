@@ -3,6 +3,7 @@ package org.kor.portal.service.tm.command
 import mu.KLogging
 import org.kor.portal.config.TmBotProperties
 import org.kor.portal.service.robofinist.RobofinistService
+import org.kor.portal.service.robofinist.model.bid.Bid
 import org.kor.portal.service.robofinist.model.program.Program
 import org.kor.portal.service.tm.CommandRequest
 import org.kor.portal.service.tm.create
@@ -105,7 +106,7 @@ class ExportHandler(
         programs: List<Program>,
         selectedIds: Set<Long>
     ): BotApiMethod<out Serializable> {
-        val text = "<b>📤 Экспорт статистики</b>\n\n" +
+        val text = "<b>📤 Экспорт статистики по организациям</b>\n\n" +
             "Выберите программы для экспорта:\n\n" +
             "Выбрано: ${selectedIds.size} из ${programs.size}"
 
@@ -153,9 +154,9 @@ class ExportHandler(
             )
         }
 
-        val csvContent = buildCsvContent(selectedPrograms)
+        val csvContent = buildOrganizationStatsCsv(selectedPrograms)
         val event = robofinistService.getEvent(eventId.toInt())
-        val fileName = "export_event_${eventId}_${System.currentTimeMillis()}.csv"
+        val fileName = "org_stats_event_${eventId}_${System.currentTimeMillis()}.csv"
 
         val document = SendDocument().apply {
             chatId = request.chatId
@@ -163,24 +164,63 @@ class ExportHandler(
                 ByteArrayInputStream(csvContent.toByteArray(StandardCharsets.UTF_8)),
                 fileName
             )
-            caption = "📊 Экспорт мероприятия: ${event?.name ?: eventId}\n" +
+            caption = "📊 Статистика организаций: ${event?.name ?: eventId}\n" +
                 "Программ: ${selectedPrograms.size}"
         }
 
         return ExportResult.Document(document)
     }
 
-    private fun buildCsvContent(programs: List<Program>): String {
-        val sb = StringBuilder()
-        sb.appendLine("Программа;ID программы;Команда;ID команды;Статус;Организации")
+    private fun buildOrganizationStatsCsv(programs: List<Program>): String {
+        val orgStats = mutableMapOf<Int, OrganizationStats>()
 
         for (program in programs) {
             val bids = robofinistService.getBids(programId = program.id)
+            
             for (bid in bids) {
-                val organizations = bid.organizations.joinToString(", ") { it.name }
-                sb.appendLine("${escapeCsv(program.name)};${program.id};${escapeCsv(bid.name)};${bid.id};${bid.status};${escapeCsv(organizations)}")
+                val participants = try {
+                    robofinistService.getParticipants(bid.id)
+                } catch (e: Exception) {
+                    logger.warn("Failed to get participants for bid ${bid.id}", e)
+                    emptyList()
+                }
+                
+                val results = try {
+                    robofinistService.getBidResults(bid.id)
+                } catch (e: Exception) {
+                    logger.warn("Failed to get results for bid ${bid.id}", e)
+                    emptyList()
+                }
+                
+                val place = results.firstOrNull { it.programId == program.id.toInt() }?.place
+                
+                for (org in bid.organizations) {
+                    val stats = orgStats.getOrPut(org.id) { 
+                        OrganizationStats(org.id, org.name) 
+                    }
+                    stats.bidsCount++
+                    stats.participantsCount += participants.size
+                    
+                    when (place) {
+                        1 -> stats.firstPlaces++
+                        2 -> stats.secondPlaces++
+                        3 -> stats.thirdPlaces++
+                    }
+                }
             }
         }
+
+        val sb = StringBuilder()
+        sb.appendLine("Организация;ID организации;Количество заявок;Количество участников;1 место;2 место;3 место;Всего призовых мест")
+
+        orgStats.values
+            .sortedByDescending { it.totalPrizes }
+            .forEach { stats ->
+                sb.appendLine(
+                    "${escapeCsv(stats.name)};${stats.id};${stats.bidsCount};${stats.participantsCount};" +
+                    "${stats.firstPlaces};${stats.secondPlaces};${stats.thirdPlaces};${stats.totalPrizes}"
+                )
+            }
 
         return sb.toString()
     }
@@ -197,6 +237,18 @@ class ExportHandler(
         private const val CHECKMARK_SELECTED = "✅ "
         private const val CHECKMARK_UNSELECTED = "⬜ "
     }
+}
+
+private data class OrganizationStats(
+    val id: Int,
+    val name: String,
+    var bidsCount: Int = 0,
+    var participantsCount: Int = 0,
+    var firstPlaces: Int = 0,
+    var secondPlaces: Int = 0,
+    var thirdPlaces: Int = 0,
+) {
+    val totalPrizes: Int get() = firstPlaces + secondPlaces + thirdPlaces
 }
 
 sealed class ExportResult {
