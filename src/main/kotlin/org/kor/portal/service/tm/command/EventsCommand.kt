@@ -1,6 +1,7 @@
 package org.kor.portal.service.tm.command
 
 import mu.KLogging
+import org.kor.portal.config.TmBotProperties
 import org.kor.portal.service.robofinist.RobofinistService
 import org.kor.portal.service.tm.CommandRequest
 import org.springframework.stereotype.Service
@@ -10,7 +11,11 @@ import java.io.Serializable
 @Service
 class EventsCommand(
     private val robofinistService: RobofinistService,
+    private val tmBotProperties: TmBotProperties,
 ) : Command {
+
+    private val exportHandler = ExportHandler(robofinistService, tmBotProperties)
+
     override val command: String
         get() = EVENTS
 
@@ -36,40 +41,57 @@ class EventsCommand(
                 "<b>Место</b>: ${event.location ?: ""}\n\n" +
                 "<b>Дата</b>: ${event.beginAt ?: ""}\n\n" +
                 "<b>Регистрация до</b>: ${event.registrationEndAt ?: ""}"
-            createTmMessage(request, text, createButtons(listOf("programs"), listOf(eventId)), html = true)
+            val buttons = mutableListOf("programs")
+            if (isAdmin(request.chatId.toLong())) buttons.add("export")
+            val keyboardMarkup = createButtons(buttons, listOf(eventId))
+            createTmMessage(request, text, keyboardMarkup, html = true)
         }
     }
 
     private fun processEventCommand(request: CommandRequest, eventId: String) =
         when (val command = request.next()) {
             "programs" -> {
-
-                val programs = robofinistService.getPrograms(eventId = eventId.toLong())
-
-                if (request.hasNext()) {
-                    val programId = request.next().toLong()
-                    val program = programs.first { it.id == programId }
-                    val bids = robofinistService.getBids(programId = programId)
-                    val text = "<b>Мероприятие</b>: $eventId\n\n" +
-                        "<b>Программа</b>: ${program.name}\n\n" +
-                        "<b>Список участников (${bids.size}):</b>\n" +
-                        bids.joinToString("\n") { it.name }
-                    createTmMessage(request, text,
-                        createButtons(listOf("back"), listOf(eventId, "programs", programId.toString())), html = true)
+                handlePrograms(eventId, request)
+            }
+            "export" -> {
+                if (isAdmin(request.chatId.toLong())) {
+                    exportHandler.handleEventExport(request, eventId)
                 } else {
-                    val text = "<b>ID</b>: $eventId\n\n" +
-                        "<b>Программы</b>"
-                    val buttons = programs.associate { it.id.toString() to it.name }
-                    createTmMessage(request, text, createButtons(buttons, listOf(eventId, "programs")), html = true)
+                    createTmMessage(request, "Нет доступа к экспорту", createButtons())
                 }
             }
+
 
             else -> createTmMessage(request, "Команда `$command` не найдена", createButtons())
         }
 
+    private fun handlePrograms(eventId: String, request: CommandRequest): BotApiMethod<out Serializable> {
+        val programs = robofinistService.getPrograms(eventId = eventId.toLong())
+
+        return if (request.hasNext()) {
+            val programId = request.next().toLong()
+            val program = programs.first { it.id == programId }
+            val bids = robofinistService.getBids(programId = programId)
+            val text = "<b>Мероприятие</b>: $eventId\n\n" +
+                "<b>Программа</b>: ${program.name}\n\n" +
+                "<b>Список участников (${bids.size}):</b>\n" +
+                bids.joinToString("\n") { it.name }
+            createTmMessage(request, text,
+                createButtons(listOf("back"), listOf(eventId, "programs", programId.toString())), html = true)
+        } else {
+            val text = "<b>ID</b>: $eventId\n\n" +
+                "<b>Программы</b>"
+            val buttons = programs.associate { it.id.toString() to it.name }
+            createTmMessage(request, text, createButtons(buttons, listOf(eventId, "programs")), html = true)
+        }
+    }
+
     private fun shortEventName(name: String): String = name
         .replace(korRegex, "КОР")
         .replace(molrRegex, "МОЛР")
+
+
+    fun isAdmin(chatId: Long): Boolean = tmBotProperties.adminUserIds.contains(chatId)
 
     companion object : KLogging() {
         private const val EVENTS = "events"

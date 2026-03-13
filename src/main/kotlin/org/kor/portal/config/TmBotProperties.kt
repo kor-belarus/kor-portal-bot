@@ -7,4 +7,5 @@ class TmBotProperties(
     val token: String,
     val username: String,
     val adminChatId: Long,
+    val adminUserIds: List<Long> = emptyList(),
 )
